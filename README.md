@@ -34,3 +34,11 @@ We will almost certainly use the code in the helper classes as a good way to def
 3. Weight particles based on lidar measurements
 4. Resample particles based on probability distribution of new weights
 5. Repeat
+
+
+
+### Schedule
+Looking into particle filter before 10/28
+By 10/2: Robot running and the particle cloud created
+By 10/4: Particle cloud updating
+Working Monday the 8th to be combining and and refining
