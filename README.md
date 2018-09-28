@@ -11,19 +11,19 @@ ParticleFilter: handles all particle filtering related functions
 RunRobot: handles all robot-related functions
 
 ### What functions will be implemented in these classes?
-create_particle: Makes particles, assigns weight to them, and visualizes them
+TODO(Isaac): create_particle: Makes particles, assigns weight to them, and visualizes them
 
-particle_filter: Does the actual particle filtering
+TODO(Gretchen): particle_filter: Does the actual particle filtering
 
-robot_position: Calculates updated robot position
+TODO(Gretchen): robot_position: Calculates updated robot position
 
-laser_callback: handles laser messages
+TODO(Isaac): laser_callback: handles laser messages
 
-particle_updater: Updates particles based on new robot position
+TODO(Gretchen): particle_updater: Updates particles based on new robot position
 
-particle_resampler: resamples based on new weights
+TODO(Isaac): particle_resampler: resamples based on new weights
 
-publisher: Publishes resampled weights
+TODO(Isaac): publisher: Publishes resampled weights
 
 ### If you will be using the code in the helper classes, how will your code utilize them.
 We will almost certainly use the code in the helper classes as a good way to define our new robot positions and convert the coordinates we are getting from the lidar into useful information for our particle filter.
