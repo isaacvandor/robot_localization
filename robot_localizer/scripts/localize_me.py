@@ -37,10 +37,7 @@ class particle(object):
 
 
     def particle_updater(self, pose):
-    	#reassign weights?
-    	#bayesian math to determine new weight
-
-    	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
+    	#figure out new particle cloud when move from old position to new position 
 
 class ParticleFilter(object):
     """ The class that represents a Particle Filter ROS Node
@@ -79,6 +76,8 @@ class ParticleFilter(object):
     def filter(self):
 		#How are we filtering?
 		#Look at weights and get rid of those with weight below certain range?
+
+		#start by randomly getting rid of points then build from there
 
 
     def run(self):
@@ -124,6 +123,7 @@ class RunRobot(object):
 
 		#read from odom
 		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
+		#convert  to geopose then to xyz
 
 
 if __name__ == '__main__':
