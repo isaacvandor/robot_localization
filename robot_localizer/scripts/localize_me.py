@@ -35,6 +35,18 @@ class particle(object):
         self.particles = 500 #based on talking to Paul
         self.linear_thresh = 0.25 #linear movement before updating
         self.angular_thresh = math.pi/10 #angular movement before updating
+        self.particle_cloud = []
+        self.current_odom_xy_theta = []
+
+        # From Paul's occupancy_field.py code
+        rospy.wait_for_service('static_map')
+        map_server = rospy.ServiceProxy('static_map', GetMap)
+        map = map_server().map
+
+        # initialize occupancy field
+        self.occupancy_field = OccupancyField(map)
+        print "Oh yeah we're occuped"
+        self.initialized = True
         self.x = x
         self.y = y 
         self.theta = theta
@@ -50,7 +62,7 @@ class particle(object):
     	#bayesian math to determine new weight
         
     	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
-
+        self.normalize_particles()
 class ParticleFilter(object):
     """ The class that represents a Particle Filter ROS Node
     """
@@ -72,6 +84,14 @@ class ParticleFilter(object):
         # as part of the project
         self.occupancy_field = OccupancyField()
         self.transform_helper = TFHelper()
+    
+    def laserCallback(self, msg):
+        self.stable_scan = msg
+    
+    def resample_particles(self):
+        ''' resamples particles according to new weights which are updated
+            based on laser scan messages
+        '''
 
     def update_initial_pose(self, msg):
         """ Callback function to handle re-initializing the particle filter
