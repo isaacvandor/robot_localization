@@ -34,14 +34,68 @@ class particle(object):
     def particle_to_pose(self):
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
         return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
+
+
+    def particle_updater(self, pose):
+    	#reassign weights?
+    	#bayesian math to determine new weight
+
+    	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
+
 class ParticleFilter(object):
-    ''' Represents all of the particle filtering operations'''
+    """ The class that represents a Particle Filter ROS Node
+    """
     def __init__(self):
+        rospy.init_node('pf')
+
+        # pose_listener responds to selection of a new approximate robot
+        # location (for instance using rviz)
+        rospy.Subscriber("initialpose",
+                         PoseWithCovarianceStamped,
+                         self.update_initial_pose)
+
+        # publisher for the particle cloud for visualizing in rviz.
+        self.particle_pub = rospy.Publisher("particlecloud",
+                                            PoseArray,
+                                            queue_size=10)
+
+        # create instances of two helper objects that are provided to you
+        # as part of the project
+        self.occupancy_field = OccupancyField()
+        self.transform_helper = TFHelper()
+
+    def update_initial_pose(self, msg):
+        """ Callback function to handle re-initializing the particle filter
+            based on a pose estimate.  These pose estimates could be generated
+            by another ROS Node or could come from the rviz GUI """
+        xy_theta = \
+            self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
+
+        # TODO this should be deleted before posting
+        self.transform_helper.fix_map_to_odom_transform(msg.pose.pose,
+                                                        msg.header.stamp)
+        # initialize your particle filter based on the xy_theta tuple
+
+    def filter(self):
+		#How are we filtering?
+		#Look at weights and get rid of those with weight below certain range?
+
+
+    def run(self):
+        r = rospy.Rate(5)
+
+        while not(rospy.is_shutdown()):
+            # in the main loop all we do is continuously broadcast the latest
+            # map to odom transform
+            self.transform_helper.send_last_map_to_odom_transform()
+            r.sleep()
 
 
 class RunRobot(object):
     ''' Represents all of the sensor and robot model related operations'''
     def __init__(self):
+    	self.transform_helper = TFHelper()
+
     
     def laserCallback(self, msg):
         ''' Represents all of the logic for handling laser messages'''
@@ -63,7 +117,14 @@ class RunRobot(object):
         for front_right, back_right in zip(front_right, reversed(back_right)):
             if front_right == 0.0 or back_right == 0.0:
                 continue
-            laser_diff += back_right - front_right        
+            laser_diff += back_right - front_right   
+
+	def robot_position(self):
+		'''Represents the position of the robot as a geopose'''
+
+		#read from odom
+		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
+
 
 if __name__ == '__main__':
     n = ParticleFilter()
