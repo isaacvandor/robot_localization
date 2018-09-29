@@ -26,6 +26,15 @@ class particle(object):
         theta: angle of the particle relative to map
         w: weight of particle
         '''
+        self.initialized = False # dont init anything until im ready
+        rospy.init_node('localizer')
+        self.base_frame = "base_link"
+        self.map_frame = "map"
+        self.odom_frame = "odom"
+        self.scan_topic = "stable_scan"
+        self.particles = 500 #based on talking to Paul
+        self.linear_thresh = 0.25 #linear movement before updating
+        self.angular_thresh = math.pi/10 #angular movement before updating
         self.x = x
         self.y = y 
         self.theta = theta
@@ -37,7 +46,10 @@ class particle(object):
 
 
     def particle_updater(self, pose):
-    	#figure out new particle cloud when move from old position to new position 
+    	#reassign weights?
+    	#bayesian math to determine new weight
+        
+    	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
 
 class ParticleFilter(object):
     """ The class that represents a Particle Filter ROS Node
@@ -76,8 +88,6 @@ class ParticleFilter(object):
     def filter(self):
 		#How are we filtering?
 		#Look at weights and get rid of those with weight below certain range?
-
-		#start by randomly getting rid of points then build from there
 
 
     def run(self):
@@ -123,7 +133,6 @@ class RunRobot(object):
 
 		#read from odom
 		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
-		#convert  to geopose then to xyz
 
 
 if __name__ == '__main__':
