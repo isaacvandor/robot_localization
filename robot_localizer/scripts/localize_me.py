@@ -8,6 +8,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Point,
 from sensor_msgs.msg import LaserScan, PointCloud
 from helper_functions import TFHelper, convert_rotation_tr
 from occupancy_field import OccupancyField
+from nav_msgs.msg import Odometry
 from nav_msgs.srv import GetMap
 from copy import deepcopy
 import tf.transformations as t
@@ -38,6 +39,7 @@ class particle(object):
         self.particle_cloud = []
         self.current_odom_xy_theta = []
 
+
         # From Paul's occupancy_field.py code
         rospy.wait_for_service('static_map')
         map_server = rospy.ServiceProxy('static_map', GetMap)
@@ -51,6 +53,9 @@ class particle(object):
         self.y = y 
         self.theta = theta
         self.w = w 
+
+    def odom_callback(self, msg):
+
 
     def particle_to_pose(self):
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
@@ -139,6 +144,7 @@ class RunRobot(object):
     ''' Represents all of the sensor and robot model related operations'''
     def __init__(self):
     	self.transform_helper = TFHelper()
+    	self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
 
     
     def laserCallback(self, msg):
