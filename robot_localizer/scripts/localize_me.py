@@ -65,6 +65,12 @@ class particle(object):
     	x_diff = new_pose.x - old_pose.x
     	self.x = self.x + diff
 
+    	y_diff = new_pose.y - old_pose.y
+    	self.y = self.y + diff
+
+    	theta_diff = new_pose.theta - old_pose.theta
+    	self.theta = self.theta + diff
+
         self.normalize_particles()
 
     def normalize_particles(self):
