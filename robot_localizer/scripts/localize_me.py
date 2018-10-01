@@ -54,32 +54,48 @@ class particle(object):
         self.theta = theta
         self.w = w 
 
-    def odom_callback(self, msg):
 
+    def particle_cloud(self, xy_theta=None)
+        '''xy_theta'''
+ 
+        # Make some noise
+        linear_noise = .5
+        angular_noise = math.pi/2.0
+
+        # Use odom to create particle cloud where once there was none
+        if xy_theta == None:
+            xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
+
+        # Make me a new particle cloud
+        self.particle_cloud = []
+    	for x in range(self.particles):
+    		x = xy_theta[0] + (random_sample()*linear_noise-(linear_noise/2.0))
+    		y = xy_theta[1] + (random_sample()*linear_noise-(linear_noise/2.0))
+    		theta = xy_theta[2] + (random_sample()*angular_noise-(angular_noise/2.0))
+    		self.particle_cloud.append(Particle(x, y, theta))
+
+        # normalize particles because all weights were originall set to 1 on default
+        self.normalize_particles()
+        self.robot_position()
 
     def particle_to_pose(self):
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
         return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
 
-
-    def particle_updater(self, old_pose, new_pose):
-    	#create new particle cloud based on movement of robo from one position to the next
-    	#update the x and y based on the new robot position
-    	#update the new angle based on angle robot traveled
-
-    	x_diff = new_pose.x - old_pose.x
-    	self.x = self.x + diff
-
-    	y_diff = new_pose.y - old_pose.y
-    	self.y = self.y + diff
-
-    	theta_diff = new_pose.theta - old_pose.theta
-    	self.theta = self.theta + diff
-
+    def particle_updater(self, pose):
+    	#reassign weights?
+    	#bayesian math to determine new weight
+        
+    	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
         self.normalize_particles()
-
-    def normalize_particles(self):
-    	#do some stuff
+        
+    def publish_particles(self, msg):
+        ''' publish my particles'''
+        particles = []
+        for particle in self.particle_cloud:
+            particles.append(particle.particle_to_pose())
+        self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
+                                            frame_id=self.map.frame),pose=particles))
 
 class ParticleFilter(object):
     """ The class that represents a Particle Filter ROS Node
@@ -106,10 +122,16 @@ class ParticleFilter(object):
     def laserCallback(self, msg):
         self.stable_scan = msg
     
+    def normalize_particles(self):
+        ''' make sure all weights add up to 1.0'''
+        sum_w = sum(particle.w for particle in self.particle_cloud)
+        for particle in self.particle_cloud:
+            particle.w/=sum_w
     def resample_particles(self):
         ''' resamples particles according to new weights which are updated
             based on laser scan messages
         '''
+        self.normalize_particles()
 
     def update_initial_pose(self, msg):
         """ Callback function to handle re-initializing the particle filter
@@ -126,8 +148,6 @@ class ParticleFilter(object):
     def filter(self):
 		#How are we filtering?
 		#Look at weights and get rid of those with weight below certain range?
-
-		#start off randomly, build from there
 
 
     def run(self):
@@ -175,7 +195,6 @@ class RunRobot(object):
 		#read from odom
 		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
 
-		#odom to geopose to xyz
 
 if __name__ == '__main__':
     n = ParticleFilter()
