@@ -50,14 +50,14 @@ class particle(object):
         print "Oh yeah we're occuped"
         self.initialized = True
         self.x = x
-        self.y = y 
+        self.y = y
         self.theta = theta
-        self.w = w 
+        self.w = w
 
 
     def particle_cloud(self, xy_theta=None)
         '''xy_theta'''
- 
+
         # Make some noise
         linear_noise = .5
         angular_noise = math.pi/2.0
@@ -82,13 +82,22 @@ class particle(object):
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
         return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
 
-    def particle_updater(self, pose):
-    	#reassign weights?
-    	#bayesian math to determine new weight
-        
-    	#p(x_n| distance range in front is same, dit range left same, dist range right same, dist range back same)
+    def particle_updater(self, old_pose, new_pose):
+    	#create new particle cloud based on movement of robo from one position to the next
+    	#update the x and y based on the new robot position
+    	#update the new angle based on angle robot traveled
+
+    	x_diff = new_pose.x - old_pose.x
+    	self.x = self.x + diff
+
+    	y_diff = new_pose.y - old_pose.y
+    	self.y = self.y + diff
+
+    	theta_diff = new_pose.theta - old_pose.theta
+    	self.theta = self.theta + diff
+
         self.normalize_particles()
-        
+
     def publish_particles(self, msg):
         ''' publish my particles'''
         particles = []
@@ -118,10 +127,10 @@ class ParticleFilter(object):
         # as part of the project
         self.occupancy_field = OccupancyField()
         self.transform_helper = TFHelper()
-    
+
     def laserCallback(self, msg):
         self.stable_scan = msg
-    
+
     def normalize_particles(self):
         ''' make sure all weights add up to 1.0'''
         sum_w = sum(particle.w for particle in self.particle_cloud)
@@ -166,7 +175,7 @@ class RunRobot(object):
     	self.transform_helper = TFHelper()
     	self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
 
-    
+
     def laserCallback(self, msg):
         ''' Represents all of the logic for handling laser messages'''
         # Set ranges for front, back, left, and right
@@ -187,7 +196,7 @@ class RunRobot(object):
         for front_right, back_right in zip(front_right, reversed(back_right)):
             if front_right == 0.0 or back_right == 0.0:
                 continue
-            laser_diff += back_right - front_right   
+            laser_diff += back_right - front_right
 
 	def robot_position(self):
 		'''Represents the position of the robot as a geopose'''
@@ -195,6 +204,7 @@ class RunRobot(object):
 		#read from odom
 		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
 
+		#odom to geopose to xyz
 
 if __name__ == '__main__':
     n = ParticleFilter()
