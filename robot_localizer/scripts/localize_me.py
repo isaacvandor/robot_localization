@@ -76,7 +76,7 @@ class particle(object):
 
         # normalize particles because all weights were originall set to 1 on default
         self.normalize_particles()
-        self.robot_position()
+        self.robot_position() #WHY?
 
     def particle_to_pose(self):
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
@@ -154,16 +154,12 @@ class ParticleFilter(object):
         # initialize your particle filter based on the xy_theta tuple
 
     def filter(self, particle_cloud):
-		'''Filters out particles. Currently randomly gets rid of x number of particles'''
+		'''Filters out particles. Currently randomly gets rid 50 of particles'''
         for x in range(50):
             remove_point = random.randint(1,len(particle_cloud))
             particle_cloud.pop(remove_point)
 
         return particle_cloud
-
-
-
-
 
     def run(self):
         r = rospy.Rate(5)
@@ -184,6 +180,8 @@ class RunRobot(object):
         self.odom_pos = None
         self.odom_ori = None
         self.odom_header = None
+
+        self.robot_xyyaw_pose = None
 
     def odom_callback(self, msg):
         self.odom_header = msg.header
@@ -216,8 +214,8 @@ class RunRobot(object):
 		'''Represents the position of the robot as a x, y , yaw tuple'''
 
         pose = self.transform_helper.convert_translation_rotation_to_pose(self.odom_pos, self.odom_ori)
-        return self.transform.helper.convert_pose_to_xy_and_theta(pose)
-
+        self.robot_xyyaw_pose = self.transform.helper.convert_pose_to_xy_and_theta(pose)
+        return self.robot_xyyaw_pose
 
 if __name__ == '__main__':
     n = ParticleFilter()
