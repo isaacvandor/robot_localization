@@ -136,6 +136,7 @@ class ParticleFilter(object):
         sum_w = sum(particle.w for particle in self.particle_cloud)
         for particle in self.particle_cloud:
             particle.w/=sum_w
+            
     def resample_particles(self):
         ''' resamples particles according to new weights which are updated
             based on laser scan messages
