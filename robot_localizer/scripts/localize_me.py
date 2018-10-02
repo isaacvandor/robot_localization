@@ -6,7 +6,7 @@ from __future__ import print_function, division
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Point, Quaternion, PoseStamped
 from sensor_msgs.msg import LaserScan, PointCloud
-from helper_functions import TFHelper, convert_rotation_tr
+from helper_functions import TFHelper
 from occupancy_field import OccupancyField
 from nav_msgs.msg import Odometry
 from nav_msgs.srv import GetMap
@@ -47,7 +47,7 @@ class particle(object):
 
         # initialize occupancy field
         self.occupancy_field = OccupancyField(map)
-        print "Oh yeah we're occuped"
+        print("Oh yeah we're occuped")
         self.initialized = True
         self.x = x
         self.y = y
@@ -135,11 +135,11 @@ class ParticleFilter(object):
         for particle in self.particle_cloud:
             particle.w/=sum_w
     
-        def draw_random_sample(n, probabilities, k):
+    def draw_random_sample(n, probabilities, k):
         """ Return a random sample of k elements from the set n with the specified probabilities
-            n: the total values for all samples
-            probabilities: the probability of selecting each element
-            n: the number of samples
+        n: the total values for all samples
+        probabilities: the probability of selecting each element
+        n: the number of samples
         """
         # sets up an index list for the chosen particles, and makes bins for the probabilities
         values = np.array(range(len(n)))
@@ -180,11 +180,10 @@ class ParticleFilter(object):
         # initialize your particle filter based on the xy_theta tuple
 
     def filter(self, particle_cloud):
-		'''Filters out particles. Currently randomly gets rid 50 of particles'''
+        '''Filters out particles. Currently randomly gets rid 50 of particles'''
         for x in range(50):
             remove_point = random.randint(1,len(particle_cloud))
             particle_cloud.pop(remove_point)
-
         return particle_cloud
 
     def run(self):
