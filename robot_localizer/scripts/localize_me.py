@@ -134,12 +134,38 @@ class ParticleFilter(object):
         sum_w = sum(particle.w for particle in self.particle_cloud)
         for particle in self.particle_cloud:
             particle.w/=sum_w
+    
+        def draw_random_sample(n, probabilities, k):
+        """ Return a random sample of k elements from the set n with the specified probabilities
+            n: the total values for all samples
+            probabilities: the probability of selecting each element
+            n: the number of samples
+        """
+        # sets up an index list for the chosen particles, and makes bins for the probabilities
+        values = np.array(range(len(n)))
+        probabilities = np.array(probabilities)
+        bins = np.add.accumulate(probabilities)
+        new_values = values[np.digitize(random_sample(n), bins)]  # choose the new particles based on the probabilities of the old ones
+        samples = []
+        for i in new_values:
+            samples.append(deepcopy(n[int(i)]))   # make a new particle cloud
+        return samples
 
     def resample_particles(self):
         ''' resamples particles according to new weights which are updated
             based on laser scan messages
         '''
         self.normalize_particles()
+         # creates n (particles) and probabilities (particle weights)
+        n = []
+        probabilities = []
+        num_samples = len(self.particle_cloud)
+        for particle in self.particle_cloud:
+            n.append(particle)
+            probabilities.append(particle.w)
+
+        # resamples particle cloud based on random sampling
+        self.particle_cloud = self.draw_random_sample(n, probabilities, num_samples)       
 
     def update_initial_pose(self, msg):
         """ Callback function to handle re-initializing the particle filter
