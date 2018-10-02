@@ -55,7 +55,7 @@ class particle(object):
         self.w = w
 
 
-    def particle_cloud(self, xy_theta=None)
+    def particle_cloud(self, xy_theta=None):
         '''xy_theta'''
 
         # Make some noise
