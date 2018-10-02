@@ -83,9 +83,7 @@ class particle(object):
         return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
 
     def particle_updater(self, old_pose, new_pose):
-    	#create new particle cloud based on movement of robo from one position to the next
-    	#update the x and y based on the new robot position
-    	#update the new angle based on angle robot traveled
+        '''Updates the particles position based on the robots change in x, y, and theta'''
 
     	x_diff = new_pose.x - old_pose.x
     	self.x = self.x + diff
@@ -136,7 +134,7 @@ class ParticleFilter(object):
         sum_w = sum(particle.w for particle in self.particle_cloud)
         for particle in self.particle_cloud:
             particle.w/=sum_w
-            
+
     def resample_particles(self):
         ''' resamples particles according to new weights which are updated
             based on laser scan messages
@@ -155,9 +153,16 @@ class ParticleFilter(object):
                                                         msg.header.stamp)
         # initialize your particle filter based on the xy_theta tuple
 
-    def filter(self):
-		#How are we filtering?
-		#Look at weights and get rid of those with weight below certain range?
+    def filter(self, particle_cloud):
+		'''Filters out particles. Currently randomly gets rid of x number of particles'''
+        for x in range(50):
+            remove_point = random.randint(1,len(particle_cloud))
+            particle_cloud.pop(remove_point)
+
+        return particle_cloud
+
+
+
 
 
     def run(self):
