@@ -175,6 +175,14 @@ class RunRobot(object):
     	self.transform_helper = TFHelper()
     	self.odom_sub = rospy.Subscriber('odom', Odometry, self.odom_callback)
 
+        self.odom_pos = None
+        self.odom_ori = None
+        self.odom_header = None
+
+    def odom_callback(self, msg):
+        self.odom_header = msg.header
+        self.odom_pos = msg.pose.pose.position
+        self.odom_ori = msg.pose.pose.orientation
 
     def laserCallback(self, msg):
         ''' Represents all of the logic for handling laser messages'''
@@ -199,12 +207,11 @@ class RunRobot(object):
             laser_diff += back_right - front_right
 
 	def robot_position(self):
-		'''Represents the position of the robot as a geopose'''
+		'''Represents the position of the robot as a x, y , yaw tuple'''
 
-		#read from odom
-		#convert self.transform_helper.convert_translation_rotation_to_pose(self, translation, rotation)
+        pose = self.transform_helper.convert_translation_rotation_to_pose(self.odom_pos, self.odom_ori)
+        return self.transform.helper.convert_pose_to_xy_and_theta(pose)
 
-		#odom to geopose to xyz
 
 if __name__ == '__main__':
     n = ParticleFilter()
