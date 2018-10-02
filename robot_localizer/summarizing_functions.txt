@@ -1,0 +1,18 @@
+Particle
+  particle_cloud -> creates list of particles
+  particle_to_pose -> turn particle position into Pose
+  particle_updater -> updates particle position based on old and new robot pose
+  publish_particle -> publish the cloud
+
+ParticleFilter
+  laserCallback -> shouldn't be there
+  normalize_particles -> make sure weights add to one
+  draw_random_sample -> returns random sample of k elements from set n
+                        should have used this for filtering
+  resample_particles -> uses bayes to create weights and resamples particle cloud
+  update_initial_pose -> handle re-initialization of particle filter
+
+RunRobot
+  obom_callback -> for subscribing to odom
+  laserCallback -> saves 4 quadrant laser scans
+  robot_position _> where is the robot, based on odom

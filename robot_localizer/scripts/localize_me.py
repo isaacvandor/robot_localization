@@ -18,9 +18,9 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 import math
 
-class particle(object):
+class Particle(object):
     ''' Represents a particle consisting of x,y coordinates, theta, and weight'''
-    def __init__(self, x=0.0, y=0.0, theta=0.0,w=1.0):
+    def __init__(self, x=0.0, y=0.0, theta=0.0, w=1.0):
         '''
         x: x-coord of the particle relative to map
         y: y-coord of the particle relative to map
@@ -134,7 +134,7 @@ class ParticleFilter(object):
         sum_w = sum(particle.w for particle in self.particle_cloud)
         for particle in self.particle_cloud:
             particle.w/=sum_w
-    
+
     def draw_random_sample(n, probabilities, k):
         """ Return a random sample of k elements from the set n with the specified probabilities
         n: the total values for all samples
@@ -165,7 +165,7 @@ class ParticleFilter(object):
             probabilities.append(particle.w)
 
         # resamples particle cloud based on random sampling
-        self.particle_cloud = self.draw_random_sample(n, probabilities, num_samples)       
+        self.particle_cloud = self.draw_random_sample(n, probabilities, num_samples)
 
     def update_initial_pose(self, msg):
         """ Callback function to handle re-initializing the particle filter
@@ -179,12 +179,6 @@ class ParticleFilter(object):
                                                         msg.header.stamp)
         # initialize your particle filter based on the xy_theta tuple
 
-    def filter(self, particle_cloud):
-        '''Filters out particles. Currently randomly gets rid 50 of particles'''
-        for x in range(50):
-            remove_point = random.randint(1,len(particle_cloud))
-            particle_cloud.pop(remove_point)
-        return particle_cloud
 
     def run(self):
         r = rospy.Rate(5)
@@ -236,12 +230,33 @@ class RunRobot(object):
             laser_diff += back_right - front_right
 
 	def robot_position(self):
-		'''Represents the position of the robot as a x, y , yaw tuple'''
+		'''Represents the position of the robot as a x, y, yaw tuple'''
 
         pose = self.transform_helper.convert_translation_rotation_to_pose(self.odom_pos, self.odom_ori)
         self.robot_xyyaw_pose = self.transform.helper.convert_pose_to_xy_and_theta(pose)
         return self.robot_xyyaw_pose
 
+
+
+def main():
+    r = rospy.Rate(5)
+
+    particle = Particle()
+    filter = ParticleFilter()
+    neato = RunRobot()
+
+    particle.particle_cloud()
+    particle.publish_particle()
+
+    while not(rospy.is_shutdown()):
+        old_robot_pose = neato.robot_position()
+        if math.abs(neato.robot_position()[0]- old_robot_pose[0]) >= .2 or math.abs(neato.robot_position()[1] - old_robot_pose[1]) >= .2 or math.abs(neato.robot_position()[2] - old_robot_pose[2] >= 5):
+            filter.resample_particles()
+            particle.publish_particle()
+        r.sleep()
+
+
+
+
 if __name__ == '__main__':
-    n = ParticleFilter()
-    n.run()
+    main()
