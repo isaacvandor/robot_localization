@@ -47,7 +47,7 @@ class Particle(object):
 
         # initialize occupancy field
         self.occupancy_field = OccupancyField(map)
-        print("Oh yeah we're occuped")
+        print("Oh yeah we're occupied")
         self.initialized = True
         self.x = x
         self.y = y
@@ -64,7 +64,7 @@ class Particle(object):
 
         # Use odom to create particle cloud where once there was none
         if xy_theta == None:
-            xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
+            xy_theta = transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
 
         # Make me a new particle cloud
         self.particle_cloud = []
