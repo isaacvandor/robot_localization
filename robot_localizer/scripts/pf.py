@@ -36,11 +36,10 @@ class ParticleFilter(object):
         # create instances of two helper objects that are provided to you
         # as part of the project
         self.num_particles = 500          # # of particles to use
-        self.occupancy_field = OccupancyField()
         self.transform_helper = TFHelper()
         self.particle_cloud = []
 
-    def particle_cloud_init(self, xy_theta=None):
+    def particle_cloud_init(self, w, h, xy_theta=None):
         '''
         Initialize the particle cloud
         xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
@@ -49,8 +48,8 @@ class ParticleFilter(object):
 
         # make a new particle cloud and create a bunch of particles
         self.particle_cloud = []
-        width = self.occupancy_field.map.info.width
-        height = self.occupancy_field.map.info.height
+        width = w
+        height = h
         for x in range(self.num_particles):
             x = random.randrange(0, width)
             y = random.randrange(0, height)
