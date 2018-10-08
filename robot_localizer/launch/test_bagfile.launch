@@ -20,8 +20,8 @@
  </group>
 
  <group unless="$(arg use_builtin)">
-  <!--<node name="pf" pkg="robot_localizer" type="pf.py" output="screen">-->
-  <node name="localizer" pkg="robot_localizer" type="pf_test.py" output="screen">
+  <node name="pf" pkg="robot_localizer" type="localizer.py" output="screen">
+  <!--node name="localizer" pkg="robot_localizer" type="pf_test.py" output="screen">-->
     <remap from="scan" to="$(arg scan_topic)"/>
   </node>
 </group>
