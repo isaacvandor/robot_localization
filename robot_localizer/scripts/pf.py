@@ -5,7 +5,7 @@
 from __future__ import print_function, division
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
-
+from std_msgs.msg import Header, String
 from helper_functions import TFHelper
 from occupancy_field import OccupancyField
 import numpy as np
@@ -31,6 +31,7 @@ class ParticleFilter(object):
         self.particle_pub = rospy.Publisher("particlecloud",
                                             PoseArray,
                                             queue_size=10)
+
 
         # create instances of two helper objects that are provided to you
         # as part of the project
@@ -103,7 +104,7 @@ class ParticleFilter(object):
         for particle in self.particle_cloud:
             particles.append(particle.particle_to_pose())
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
-                                                          frame_id=self.map_frame),
+                                                          frame_id="map"),
                                             poses=particles))
 
 
