@@ -97,7 +97,7 @@ class ParticleFilter(object):
         weights_sum = sum(particle.weight for particle in self.particle_cloud)
         for particle in self.particle_cloud:
             particle.weight /= weights_sum
-'''
+
     def particle_publisher(self, msg):
         particles = []
         for particle in self.particle_cloud:
@@ -105,7 +105,7 @@ class ParticleFilter(object):
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
                                                           frame_id=self.map_frame),
                                             poses=particles))
-'''
+
 
 if __name__ == '__main__':
     n = ParticleFilter()
