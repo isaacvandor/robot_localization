@@ -170,14 +170,6 @@ class RobotLocalizer(object):
             # wait for initialization to complete
             return
 
-        if not(self.tf_listener.canTransform(self.base_frame,msg.header.frame_id,msg.header.stamp)):
-            # need to know how to transform the laser to the base frame
-            return
-
-        if not(self.tf_listener.canTransform(self.base_frame,self.odom_frame,msg.header.stamp)):
-            # need to know how to transform between base and odometry frames
-            return
-
         # calculate pose of laser relative ot the robot base
         pose = PoseStamped(header=Header(stamp=rospy.Time(0),
                                       frame_id=msg.header.frame_id))
@@ -194,6 +186,7 @@ class RobotLocalizer(object):
             # now that we have all of the necessary transforms we can update the particle cloud
             self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height)
             # cache the last odometric pose so we can only update our particle filter if we move more than self.linear_threshold or self.angular_threshold
+
             self.current_odom_xy_theta = new_odom_xy_theta
             # update our map to odom transform now that the particles are initialized
             self.fix_map_to_odom_transform(msg)
