@@ -62,6 +62,8 @@ class RobotLocalizer(object):
 
         self.max_dist = 2.0   # maximum penalty to assess in the likelihood field model
 
+        self.odom_pose = PoseStamped()
+
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.process_scan)
         # init pf
         # subscribers and publisher
