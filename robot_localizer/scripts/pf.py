@@ -82,10 +82,7 @@ class ParticleFilter(object):
         # make sure the distribution is normalized
         if len(self.particle_cloud):
             '''Make sure the particle weights sum to 1'''
-            weights_sum = sum(
-                particle.weight for particle in self.particle_cloud)
-            for particle in self.particle_cloud:
-                particle.weight /= weights_sum
+            weights_sum = [particle.weight for particle in self.particle_cloud]
 
             return list(np.random.choice(self.particle_cloud, size=len(self.particle_cloud), replace=True, p=weights_sum))
         else:
