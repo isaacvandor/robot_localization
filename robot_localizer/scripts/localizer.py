@@ -85,7 +85,7 @@ class RobotLocalizer(object):
         ''' Update the estimate of the robot's pose given the updated particles.'''
 
         # Calculate avg particle position based on pose
-    	mean_particle = Particle(0, 0, 0, 0)
+        mean_particle = Particle(0, 0, 0, 0)
         mean_particle_theta_x = 0
         mean_particle_theta_y = 0
         for particle in self.pf.particle_cloud:
@@ -129,7 +129,7 @@ class RobotLocalizer(object):
         dist: Distance to move forward to xy position
         angle2: Angle by which the robot rotates to face final direction
         '''
-    	for particle in self.pf.particle_cloud:
+        for particle in self.pf.particle_cloud:
             # calculates angle1, d, and angle2
             angle1 = np.arctan2(float(delta[1]),float(delta[0])) - old_odom_xy_theta[2]
             dist = np.sqrt(np.square(delta[0])+np.square(delta[1]))
@@ -162,7 +162,7 @@ class RobotLocalizer(object):
     def pose_updater(self, msg):
         ''' Restart particle filter based on updated pose '''
         xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
-        self.fix_map_to_odom_transform(msg)
+        #self.fix_map_to_odom_transform(msg)
         self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height, xy_theta)
         print("particle cloud initialized")
 
@@ -191,7 +191,7 @@ class RobotLocalizer(object):
 
             self.current_odom_xy_theta = new_odom_xy_theta
             # update our map to odom transform now that the particles are initialized
-            self.fix_map_to_odom_transform(msg)
+            #self.fix_map_to_odom_transform(msg)
         elif (abs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
               abs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
               abs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
@@ -201,12 +201,12 @@ class RobotLocalizer(object):
                 last_projected_scan_timeshift = deepcopy(self.laserCallback)
                 last_projected_scan_timeshift.header.stamp = msg.header.stamp
                 self.scan_in_base_link = self.tf_listener.transformPointCloud("base_link", last_projected_scan_timeshift)
-
             self.laser_particle_updater(msg)   # update based on laser scan
             self.robot_pose_updater()                # update robot's pose
             self.pf.particle_resampler()               # resample particles to focus on areas of high density
-            self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
+            #self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
 
+    '''
     def fix_map_to_odom_transform(self, msg):
             """ This method constantly updates the offset of the map and
                 odometry coordinate systems based on the latest results from
@@ -224,6 +224,7 @@ class RobotLocalizer(object):
             self.odom_to_map = self.tf_listener.transformPose('odom', p)
             (self.translation, self.rotation) = \
                 self.transform_helper.convert_pose_inverse_transform(self.odom_to_map.pose)
+    '''
 
     def send_last_map_to_odom_transform(self):
         if not(hasattr(self, 'translation') and hasattr(self, 'rotation')):
