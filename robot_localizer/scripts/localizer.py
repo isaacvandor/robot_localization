@@ -77,9 +77,13 @@ class RobotLocalizer(object):
 
         self.current_odom_xy_theta = []
 
+        self.time = rospy.get_rostime() #get time as rospy.Time instance
+        self.floattime = rospy.get_time() #get time as float secs
+
         print("initialization complete")
         self.initialized = True
-
+        print(self.time)
+        print(self.floattime)
 
     def robot_pose_updater(self):
         ''' Update the estimate of the robot's pose given the updated particles.'''
@@ -105,7 +109,48 @@ class RobotLocalizer(object):
     def laserCallback(self, msg):
         self.laserCallback = msg
 
+    def process_scan(self, msg):
+        '''Handling laser data to update our understanding of the robot based on laser and odometry'''
+        if not(self.initialized):
+            # wait for initialization to complete
+            return
 
+        # calculate pose of laser relative ot the robot base
+        pose = PoseStamped(header=Header(stamp=rospy.Time(0),
+                                      frame_id=msg.header.frame_id))
+        self.laser_pose = self.tf_listener.transformPose(self.base_frame,pose)
+
+        # find out where the robot thinks it is based on its odometry
+        pose = PoseStamped(header=Header(stamp=msg.header.stamp,
+                                      frame_id=self.base_frame),
+                        pose=Pose())
+        self.odom_pose = self.tf_listener.transformPose(self.odom_frame, pose)
+        # store the the odometry pose in a more convenient format (x,y,theta)
+        new_odom_xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
+        if not(self.pf.particle_cloud):
+            # now that we have all of the necessary transforms we can update the particle cloud
+            self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height)
+            # cache the last odometry pose so we can only update our particle filter if we move more than self.linear_threshold or self.angular_threshold
+
+            self.current_odom_xy_theta = new_odom_xy_theta
+            # update our map to odom transform now that the particles are initialized
+            self.fix_map_to_odom_transform(msg)
+        elif (abs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
+              abs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
+              abs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
+            # we have moved far enough to do an update!
+            self.odom_particle_updater(msg)    # update based on odometry
+            '''
+            if self.laserCallback:
+                last_projected_scan_timeshift = deepcopy(self.laserCallback)
+                last_projected_scan_timeshift.header.stamp = msg.header.stamp
+                self.scan_in_base_link = self.tf_listener.transformPointCloud("base_link", last_projected_scan_timeshift)
+            '''
+            self.laser_particle_updater(msg)   # update based on laser scan
+            self.robot_pose_updater()                # update robot's pose
+            self.pf.particle_resampler()               # resample particles to focus on areas of high density
+            self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
+   
     def odom_particle_updater(self, msg):
         ''' Updates particles based on new odom pose using a delta value for x,y,theta'''
         new_odom_xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
