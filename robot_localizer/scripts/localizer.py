@@ -82,8 +82,6 @@ class RobotLocalizer(object):
 
         print("initialization complete")
         self.initialized = True
-        print(self.time)
-        print(self.floattime)
 
     def robot_pose_updater(self):
         ''' Update the estimate of the robot's pose given the updated particles.'''
@@ -135,9 +133,9 @@ class RobotLocalizer(object):
             self.current_odom_xy_theta = new_odom_xy_theta
             # update our map to odom transform now that the particles are initialized
             self.fix_map_to_odom_transform(msg)
-        elif (abs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
-              abs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
-              abs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
+        elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
+              math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
+              math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
             # we have moved far enough to do an update!
             self.odom_particle_updater(msg)    # update based on odometry
             '''
@@ -231,7 +229,7 @@ class RobotLocalizer(object):
 
     def send_last_map_to_odom_transform(self):
         if not(hasattr(self, 'translation') and hasattr(self, 'rotation')):
-            print("sup bitch")
+            print("sup dude")
             return
         self.tf_broadcaster.sendTransform(self.translation,
                                           self.rotation,
@@ -241,7 +239,7 @@ class RobotLocalizer(object):
 
 if __name__ == '__main__':
     n = RobotLocalizer()
-    r = rospy.Rate(5)
+    r = rospy.Rate(10)
 
     while not(rospy.is_shutdown()):
         n.send_last_map_to_odom_transform()
