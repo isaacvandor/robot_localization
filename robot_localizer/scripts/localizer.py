@@ -148,6 +148,7 @@ class RobotLocalizer(object):
             self.robot_pose_updater()                # update robot's pose
             self.pf.particle_resampler()               # resample particles to focus on areas of high density
             self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
+        self.pf.particle_publisher(msg)
 
     def odom_particle_updater(self, msg):
         ''' Updates particles based on new odom pose using a delta value for x,y,theta'''
