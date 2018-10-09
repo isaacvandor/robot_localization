@@ -132,6 +132,7 @@ class RobotLocalizer(object):
 
             self.current_odom_xy_theta = new_odom_xy_theta
             # update our map to odom transform now that the particles are initialized
+            print("Trying to initialize!")
             self.fix_map_to_odom_transform(msg)
         elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
               math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
