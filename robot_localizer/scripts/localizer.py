@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import rospy
+
 from geometry_msgs.msg import PointStamped, PoseStamped, Twist, Point, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Header
+from std_msgs.msg import Header, String
 from neato_node.msg import Bump
 from sensor_msgs.msg import LaserScan
-from particle import Particle
-import matplotlib.pyplot as plt
-from datetime import datetime
 from visualization_msgs.msg import Marker
+
+from particle import Particle
 import statistics
 from occupancy_field import OccupancyField
 from copy import deepcopy
@@ -20,7 +21,7 @@ from tf import TransformListener
 from tf import TransformBroadcaster
 import numpy as np
 from pf import ParticleFilter
-import rospy
+
 
 class RobotLocalizer(object):
     '''
@@ -84,7 +85,9 @@ class RobotLocalizer(object):
         self.initialized = True
 
     def robot_pose_updater(self):
-        ''' Update the estimate of the robot's pose given the updated particles.'''
+        ''' Update the estimate of the robot's pose given the updated particles by computing the mean pose'''
+
+        self.particle_normalizer()
 
         # Calculate avg particle position based on pose
         mean_particle = Particle(0, 0, 0, 0)
@@ -114,6 +117,15 @@ class RobotLocalizer(object):
             # wait for initialization to complete
             return
 
+        if not(self.tf_listener.canTransform('base_link',msg.header.frame_id,msg.header.stamp)):
+            # need to know how to transform the laser to the base frame
+            # this will be given by either Gazebo or neato_node
+            return
+
+        if not(self.tf_listener.canTransform('base_link','odom',msg.header.stamp)):
+            # need to know how to transform between base and odometric frames
+            # this will eventually be published by either Gazebo or neato_node
+            return
         # calculate pose of laser relative ot the robot base
         pose = PoseStamped(header=Header(stamp=rospy.Time(0),
                                       frame_id=msg.header.frame_id))
@@ -210,7 +222,7 @@ class RobotLocalizer(object):
     def pose_updater(self, msg):
         ''' Restart particle filter based on updated pose '''
         xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
-        self.fix_map_to_odom_transform(msg)
+        #self.fix_map_to_odom_transform(msg)
         self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height, xy_theta)
         print("particle cloud initialized")
 
@@ -220,7 +232,7 @@ class RobotLocalizer(object):
                 the localizer """
             (translation, rotation) = \
                 self.transform_helper.convert_pose_inverse_transform(self.robot_pose)
-            p = PoseStamped(
+            pose = PoseStamped(
                 pose=self.transform_helper.convert_translation_rotation_to_pose(translation,
                                                             rotation),
                 header=Header(stamp=msg.header.stamp, frame_id='base_link'))
@@ -228,7 +240,7 @@ class RobotLocalizer(object):
                                             'odom',
                                             msg.header.stamp,
                                             rospy.Duration(1.0))
-            self.odom_to_map = self.tf_listener.transformPose('odom', p)
+            self.odom_to_map = self.tf_listener.transformPose('odom', pose)
             (self.translation, self.rotation) = \
                 self.transform_helper.convert_pose_inverse_transform(self.odom_to_map.pose)
 
