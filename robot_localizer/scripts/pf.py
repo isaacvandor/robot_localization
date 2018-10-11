@@ -44,16 +44,21 @@ class ParticleFilter(object):
         '''
         print("Im here now bitch")
         linear_noise = 1.0 #add some noise
+        angular_noise = math.pi/2.0
+
         #  if doesn't exist, use odom
         if xy_theta == None:
             xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
 
+        self.particle_cloud = []
         for x in range(self.num_particles):
             x = xy_theta[0]+(random_sample()*linear_noise-(linear_noise/2.0))
             y = xy_theta[1]+(random_sample()*linear_noise-(linear_noise/2.0))
-            theta = math.radians(random.randrange(0, 360))
+            theta = xy_theta[2] + (random_sample()*angular_noise-(angular_noise/2.0))
             particles = Particle(x,y,theta)
-        self.particle_cloud.append(particles)
+            self.particle_cloud.append(particles)
+
+        self.particle_normalizer()
 
     def particle_normalizer(self):
         '''Make sure the particle weights sum to 1'''

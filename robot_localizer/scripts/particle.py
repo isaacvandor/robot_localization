@@ -7,11 +7,11 @@ import tf
 
 class Particle(object):
     def __init__(self,x=0.0,y=0.0,theta=0.0,w=1.0):
-        """ Construct a new Particle
-            x: the x-coord of the hypothesis relative to the map frame
-            y: the y-coord of the hypothesis relative ot the map frame
-            theta: the yaw of the hypothesis relative to the map frame
-            weight: the particle weight (the class does not ensure that particle weights are normalized """
+        """ Build new particles
+            x: the x-coord of the hypothesis
+            y: the y-coord of the hypothesis
+            theta: the yaw of the hypothesis
+            w: the particle weight"""
         self.w = w
         self.theta = theta
         self.x = x
