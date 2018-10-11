@@ -4,7 +4,7 @@
 
 from __future__ import print_function, division
 import rospy
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, PoseStamped
 from std_msgs.msg import Header, String
 from helper_functions import TFHelper
 from occupancy_field import OccupancyField
@@ -34,23 +34,28 @@ class ParticleFilter(object):
         # create instances of two helper objects that are provided to you
         # as part of the project
         self.num_particles = 500          # # of particles to use
+        self.odom_pose = PoseStamped()
         self.transform_helper = TFHelper()
         self.particle_cloud = []
 
-    def particle_cloud_init(self, w, h, xy_theta=None):
+    def particle_cloud_init(self, xy_theta=None):
         '''
         Initialize the particle cloud
         xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
                 particle cloud around. If None, odometry will be used instead
         '''
+        linear_noise = 1.0 #add some noise
+        #  if doesn't exist, use odom
+        if xy_theta == None:
+            xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
 
         # make a new particle cloud and create a bunch of particles
         self.particle_cloud = []
-        width = w
-        height = h
         for x in range(self.num_particles):
-            x = random.randrange(0, width)
-            y = random.randrange(0, height)
+            #x = random.randrange(0, width)
+            #y = random.randrange(0, height)
+            x = xy_theta[0]+(linear_noise-(linear_noise/2.0))
+            y = xy_theta[1]+(linear_noise-(linear_noise/2.0))
             theta = math.radians(random.randrange(0, 360))
         self.particle_cloud.append(Particle(x, y, theta))
 

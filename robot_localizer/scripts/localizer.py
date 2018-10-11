@@ -139,7 +139,7 @@ class RobotLocalizer(object):
         new_odom_xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
         if not(self.pf.particle_cloud):
             # now that we have all of the necessary transforms we can update the particle cloud
-            self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height)
+            self.pf.particle_cloud_init()
             # cache the last odometry pose so we can only update our particle filter if we move more than self.linear_threshold or self.angular_threshold
 
             self.current_odom_xy_theta = new_odom_xy_theta
