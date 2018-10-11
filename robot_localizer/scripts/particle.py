@@ -21,4 +21,4 @@ class Particle(object):
     def particle_to_pose(self):
         ''' A helper function to convert a particle to a geometry_msgs/Pose message'''
         orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
-        return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], weight=orientation_tuple[3]))
+        return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
