@@ -50,6 +50,8 @@ class RobotLocalizer(object):
         self.odom_pose = PoseStamped()
         self.robot_pose = Pose()
 
+        self.robot_pose = Pose()
+
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.process_scan)
         # init pf
         # subscribers and publisher
