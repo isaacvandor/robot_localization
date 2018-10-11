@@ -110,6 +110,7 @@ class RobotLocalizer(object):
     def process_scan(self, msg):
         '''Handling laser data to update our understanding of the robot based on laser and odometry'''
         if not(self.initialized):
+            print("first if not")
             # wait for initialization to complete
             return
 
@@ -145,6 +146,8 @@ class RobotLocalizer(object):
                 last_projected_scan_timeshift.header.stamp = msg.header.stamp
                 self.scan_in_base_link = self.tf_listener.transformPointCloud("base_link", last_projected_scan_timeshift)
             '''
+
+            print("map!")
             self.laser_particle_updater(msg)   # update based on laser scan
             self.robot_pose_updater()                # update robot's pose
             self.pf.particle_resampler()               # resample particles to focus on areas of high density
