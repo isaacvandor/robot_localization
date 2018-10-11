@@ -56,7 +56,7 @@ class RobotLocalizer(object):
         self.odom_frame = "odom"        # Odom coord frame
         self.scan_topic = "scan"        # Laser scan topic
 
-        self.num_particles = 500          # # of particles to use
+        self.num_particles = 100          # # of particles to use
 
         self.linear_threshold = 0.1             # the amount of linear movement before performing an update
         self.angular_threshold = math.pi/10     # the amount of angular movement before performing an update
@@ -64,6 +64,7 @@ class RobotLocalizer(object):
         self.max_dist = 2.0   # maximum penalty to assess in the likelihood field model
 
         self.odom_pose = PoseStamped()
+        self.robot_pose = Pose()
 
         self.robot_pose = Pose()
 
@@ -98,13 +99,13 @@ class RobotLocalizer(object):
         mean_particle_theta_x = 0
         mean_particle_theta_y = 0
         for particle in self.pf.particle_cloud:
-            mean_particle.x += particle.x * particle.weight
-            mean_particle.y += particle.y * particle.weight
+            mean_particle.x += particle.x * particle.w
+            mean_particle.y += particle.y * particle.w
 
             # Using trig to calculate angle (@Paul I hate Trigonometry!)
             distance_vector = np.sqrt(np.square(particle.y)+ np.square(particle.x))
-            mean_particle_theta_x += distance_vector * np.cos(particle.theta) * particle.weight
-            mean_particle_theta_y += distance_vector * np.sin(particle.theta) * particle.weight
+            mean_particle_theta_x += distance_vector * np.cos(particle.theta) * particle.w
+            mean_particle_theta_y += distance_vector * np.sin(particle.theta) * particle.w
 
         mean_particle.theta = np.arctan2(float(mean_particle_theta_y),float(mean_particle_theta_x))
 
@@ -151,22 +152,17 @@ class RobotLocalizer(object):
             # update our map to odom transform now that the particles are initialized
             print("Trying to initialize!")
             self.fix_map_to_odom_transform(msg)
+            print("Initialized finally!")
+            self.pf.particle_publisher(msg)
         else:
             # we have moved far enough to do an update!
             self.odom_particle_updater(msg)    # update based on odometry
-            '''
-            if self.laserCallback:
-                last_projected_scan_timeshift = deepcopy(self.laserCallback)
-                last_projected_scan_timeshift.header.stamp = msg.header.stamp
-                self.scan_in_base_link = self.tf_listener.transformPointCloud("base_link", last_projected_scan_timeshift)
-            '''
-
-            print("map!")
+            #print("map!")
             self.laser_particle_updater(msg)   # update based on laser scan
             self.robot_pose_updater()                # update robot's pose
-            self.pf.particle_resampler()               # resample particles to focus on areas of high density
+            self.particle_resampler()               # resample particles to focus on areas of high density
             self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
-            self.pf.particle_publisher(msg)
+        self.pf.particle_publisher(msg)
 
     def odom_particle_updater(self, msg):
         ''' Updates particles based on new odom pose using a delta value for x,y,theta'''
@@ -183,7 +179,7 @@ class RobotLocalizer(object):
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
-        odom_noise = .25 # noise level
+        odom_noise = .5 # noise level
 
         '''
         updates the particles based on angle1, dist, and angle2.
@@ -204,6 +200,20 @@ class RobotLocalizer(object):
             particle.y = particle.y + dist*np.sin(particle.theta)*(odom_noise+(1-odom_noise/2.0))
             particle.theta = particle.theta + angle2*(odom_noise+(1-odom_noise/2.0))
 
+    def particle_resampler(self):
+        '''Resample the particles according to the new particle weights.'''
+        # make sure the distribution is normalized
+        self.pf.particle_normalizer()
+
+        if len(self.pf.particle_cloud):
+            '''Make sure the particle weights sum to 1'''
+            weights_sum = [particle.w for particle in self.pf.particle_cloud]
+
+            return list(np.random.choice(self.pf.particle_cloud, size=len(self.pf.particle_cloud), replace=True, p=weights_sum))
+        else:
+            print("help i've fallen and cant get up...jk")
+            return None
+
     def laser_particle_updater(self, msg):
         '''Updates the particle weights in response to the scan contained in the msg'''
 
@@ -214,12 +224,12 @@ class RobotLocalizer(object):
                 rad = np.radians(theta)
                 err = self.occupancy_field.get_closest_obstacle_distance(particle.x + msg.ranges[theta] * np.cos(particle.theta + rad), particle.y + msg.ranges[theta] * np.sin(particle.theta + rad))
                 if (math.isnan(err)):   # if the get_closest_obstacle_distance method finds that a point is out of bounds, then the particle can't ever be it
-                    particle.weight = 0
+                    particle.w = 0
                     break
             if (sum(error) == 0):     # if the particle is basically a perfect match, then we make the particle almost always enter the next iteration through resampling
-                particle.weight = 1.0
+                particle.w = 1.0
             else:
-                particle.weight = 1.0/sum(error)   # the errors are inverted such that large errors become small and small errors become large
+                particle.w = 1.0/sum(error)   # the errors are inverted such that large errors become small and small errors become large
 
     def pose_updater(self, msg):
         ''' Restart particle filter based on updated pose '''
