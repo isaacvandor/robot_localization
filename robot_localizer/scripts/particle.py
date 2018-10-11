@@ -6,13 +6,13 @@ from tf.transformations import euler_from_quaternion, rotation_matrix, quaternio
 import tf
 
 class Particle(object):
-    def __init__(self,x=0.0,y=0.0,theta=0.0,weight=1.0):
+    def __init__(self,x=0.0,y=0.0,theta=0.0,w=1.0):
         """ Construct a new Particle
             x: the x-coord of the hypothesis relative to the map frame
             y: the y-coord of the hypothesis relative ot the map frame
             theta: the yaw of the hypothesis relative to the map frame
             weight: the particle weight (the class does not ensure that particle weights are normalized """
-        self.weight = weight
+        self.w = w
         self.theta = theta
         self.x = x
         self.y = y
