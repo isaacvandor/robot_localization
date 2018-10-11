@@ -19,8 +19,6 @@ class ParticleFilter(object):
     """
 
     def __init__(self):
-#        rospy.init_node('pf')
-
         # pose_listener responds to selection of a new approximate robot
         # location (for instance using rviz)
         rospy.Subscriber("initialpose",
