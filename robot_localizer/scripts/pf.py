@@ -80,7 +80,7 @@ class ParticleFilter(object):
         for particle in self.particle_cloud:
             particles.append(particle.particle_to_pose())
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
-                                                          frame_id="map"),
+                                                          frame_id="odom"),
                                             poses=particles))
 
 
