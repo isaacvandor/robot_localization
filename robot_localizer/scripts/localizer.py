@@ -209,7 +209,9 @@ class RobotLocalizer(object):
             self.fix_map_to_odom_transform(msg)
             print("Initialized finally!")
             self.pf.particle_publisher(msg)
-        else:
+        elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
+              math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
+              math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
             # we have moved far enough to do an update!
             self.odom_particle_updater(msg)    # update based on odometry
             #print("map!")

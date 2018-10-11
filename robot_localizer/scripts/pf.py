@@ -27,8 +27,6 @@ class ParticleFilter(object):
         self.particle_pub = rospy.Publisher("particlecloud",
                                             PoseArray,
                                             queue_size=10)
-
-
         # create instances of two helper objects that are provided to you
         # as part of the project
         self.num_particles = 500          # # of particles to use
@@ -42,11 +40,11 @@ class ParticleFilter(object):
         xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
                 particle cloud around. If None, odometry will be used instead
         '''
-        print("Im here now bitch")
-        linear_noise = 1.0 #add some noise
+        #add some noise to our particle cloud
+        linear_noise = 1.0
         angular_noise = math.pi/2.0
 
-        #  if doesn't exist, use odom
+        # Use odom if there's no xy_theta
         if xy_theta == None:
             xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose.pose)
 
