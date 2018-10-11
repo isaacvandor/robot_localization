@@ -17,7 +17,7 @@ One of the main design decisions we made in the localizer class was the math for
 ## What if any challenges did you face along the way?
 Rather than starting with the particle cloud, we built a lot of logic to deal with the localization aspect. While this was great for getting localization working quickly, getting the particle cloud to show up was much harder. Also, @Isaac is pretty dumb and didn't realize he was appending particles outside of the for loop. Once we got this working, most of the work focused on tuning and improving the particle filter. 
 
-![GIF of our particle cloud just not even running at all (https://github.com/isaacvandor/robot_localization/blob/master/media/solonelyohsolonely.gif)
+![GIF of our particle cloud just not even running at all](https://github.com/isaacvandor/robot_localization/blob/master/media/solonelyohsolonely.gif)
 
 ## What would you do to improve your project if you had more time?
 If we had more time, we would definitely focus on improving the particle filter. Currently, the particle filter uses occupancy fields and the Nearest Neighbors Algorithm to filter particles. Using occupancy fields works well for a basic implementation, but this method doesn't take into account obstacles that might be between the robot and the distance at which it is checking. Additionally, other methods like ray casting might be faster and ultimately more successful if we had the time to implement these methods. 
