@@ -69,7 +69,9 @@ class RobotLocalizer(object):
         # init pf
         # subscribers and publisher
         self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_particle_updater)
-
+        rospy.Subscriber("initialpose",
+                         PoseWithCovarianceStamped,
+                         self.pose_updater)
         # enable listening for and broadcasting coord transforms
         self.tf_listener = TransformListener()
         self.tf_broadcaster = TransformBroadcaster()
@@ -221,7 +223,8 @@ class RobotLocalizer(object):
         ''' Restart particle filter based on updated pose '''
         xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
         #self.fix_map_to_odom_transform(msg)
-        self.pf.particle_cloud_init(self.occupancy_field.map.info.width, self.occupancy_field.map.info.height, xy_theta)
+        self.pf.particle_cloud_init(xy_theta)
+        self.fix_map_to_odom_transform(msg)
         print("particle cloud initialized")
 
     def fix_map_to_odom_transform(self, msg):
@@ -254,7 +257,7 @@ class RobotLocalizer(object):
 
 if __name__ == '__main__':
     n = RobotLocalizer()
-    r = rospy.Rate(10)
+    r = rospy.Rate(5)
 
     while not(rospy.is_shutdown()):
         n.send_last_map_to_odom_transform()

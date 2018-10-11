@@ -9,6 +9,7 @@ from std_msgs.msg import Header, String
 from helper_functions import TFHelper
 from occupancy_field import OccupancyField
 import numpy as np
+from numpy.random import random_sample
 from particle import Particle
 import random
 import math
@@ -21,9 +22,6 @@ class ParticleFilter(object):
     def __init__(self):
         # pose_listener responds to selection of a new approximate robot
         # location (for instance using rviz)
-        rospy.Subscriber("initialpose",
-                         PoseWithCovarianceStamped,
-                         self.update_initial_pose)
 
         # publisher for the particle cloud for visualizing in rviz.
         self.particle_pub = rospy.Publisher("particlecloud",
@@ -54,31 +52,10 @@ class ParticleFilter(object):
         for x in range(self.num_particles):
             #x = random.randrange(0, width)
             #y = random.randrange(0, height)
-            x = xy_theta[0]+(linear_noise-(linear_noise/2.0))
-            y = xy_theta[1]+(linear_noise-(linear_noise/2.0))
+            x = xy_theta[0]+(random_sample()*linear_noise-(linear_noise/2.0))
+            y = xy_theta[1]+(random_sample()*linear_noise-(linear_noise/2.0))
             theta = math.radians(random.randrange(0, 360))
         self.particle_cloud.append(Particle(x, y, theta))
-
-    def update_initial_pose(self, msg):
-        """ Callback function to handle re-initializing the particle filter
-            based on a pose estimate.  These pose estimates could be generated
-            by another ROS Node or could come from the rviz GUI """
-        xy_theta = \
-            self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
-
-        # TODO this should be deleted before posting
-        self.transform_helper.fix_map_to_odom_transform(msg.pose.pose,
-                                                        msg.header.stamp)
-        # initialize your particle filter based on the xy_theta tuple
-
-    def run(self):
-        r = rospy.Rate(5)
-
-        while not(rospy.is_shutdown()):
-            # in the main loop all we do is continuously broadcast the latest
-            # map to odom transform
-            self.transform_helper.send_last_map_to_odom_transform()
-            r.sleep()
 
     def particle_resampler(self):
         '''Resample the particles according to the new particle weights.'''
