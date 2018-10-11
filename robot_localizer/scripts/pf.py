@@ -53,7 +53,7 @@ class ParticleFilter(object):
             y = xy_theta[1]+(random_sample()*linear_noise-(linear_noise/2.0))
             theta = math.radians(random.randrange(0, 360))
             particles = Particle(x,y,theta)
-        self.particle_cloud.append(particles)
+            self.particle_cloud.append(particles)
 
     def particle_normalizer(self):
         '''Make sure the particle weights sum to 1'''
@@ -66,5 +66,5 @@ class ParticleFilter(object):
         for p in self.particle_cloud:
             particles.append(p.particle_to_pose())
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
-                                                          frame_id="odom"),
+                                                          frame_id="map"),
                                             poses=particles))
