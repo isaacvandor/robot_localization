@@ -87,7 +87,7 @@ class RobotLocalizer(object):
     def robot_pose_updater(self):
         ''' Update the estimate of the robot's pose given the updated particles by computing the mean pose'''
 
-        self.particle_normalizer()
+        self.pf.particle_normalizer()
 
         # Calculate avg particle position based on pose
         mean_particle = Particle(0, 0, 0, 0)
@@ -147,9 +147,7 @@ class RobotLocalizer(object):
             # update our map to odom transform now that the particles are initialized
             print("Trying to initialize!")
             self.fix_map_to_odom_transform(msg)
-        elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
-              math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
-              math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
+        else:
             # we have moved far enough to do an update!
             self.odom_particle_updater(msg)    # update based on odometry
             '''
@@ -164,7 +162,7 @@ class RobotLocalizer(object):
             self.robot_pose_updater()                # update robot's pose
             self.pf.particle_resampler()               # resample particles to focus on areas of high density
             self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
-        self.pf.particle_publisher(msg)
+            self.pf.particle_publisher(msg)
 
     def odom_particle_updater(self, msg):
         ''' Updates particles based on new odom pose using a delta value for x,y,theta'''
