@@ -20,6 +20,8 @@ Rather than starting with the particle cloud, we built a lot of logic to deal wi
 ## What would you do to improve your project if you had more time?
 If we had more time, we would definitely focus on improving the particle filter. Currently, the particle filter uses occupancy fields and the Nearest Neighbors Algorithm to filter particles. Using occupancy fields works well for a basic implementation, but this method doesn't take into account obstacles that might be between the robot and the distance at which it is checking. Additionally, other methods like ray casting might be faster and ultimately more successful if we had the time to implement these methods. 
 
+![GIF of our "localizer" running](https://github.com/isaacvandor/robot_localization/blob/master/media/solonelyohsolonely.gif)
+
 ## Did you learn any interesting lessons for future robotic programming projects?
 *These could relate to working on robotics projects in teams, working on more
 open-ended (and longer term) problems, or any other relevant topic.*
