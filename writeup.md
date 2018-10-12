@@ -10,6 +10,8 @@ same x,y, and theta amount as the robot.
 *(Note: this doesn't have to be super-detailed, you should try to explain what you did at a high-level so that others in the class could reasonably understand what you did).*
 To develop the localizer, three classes were created: a Particle class, a ParticleFilter class, and a Localizer class. The particle class handles the creation of particles and converts them into a Pose message easily visualized in RVIZ while the ParticleFilter class iniializes a particle cloud around the robot (plus some noise to add variation), normalized the particles, and then publishes them to a PoseArray.
 
+![GIF of our particle filter in action](https://github.com/isaacvandor/robot_localization/blob/master/media/filterclouds.gif)
+
 ## Describe a design decision you had to make when working on your project and what you ultimately did (and why)? 
 *These design decisions could be particular choices for how you implemented some part of an algorithm or perhaps a decision regarding which of two external packages to use in your project.*
 One of the main design decisions we made in the localizer class was the math for handling robot pose updates. There are two good methods for this: computing the mean pose or computing the most likely pose. We chose to use the average particle position to calculate mean pose because we both took trig in high school and felt that calculating mean pose was the quickest implementation.
