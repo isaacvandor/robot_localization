@@ -3,12 +3,12 @@ The goal of this project was to create a robot localizer using particle clouds
 and filtering. In order to do this we created a particle cloud containing
 weighted particles. The weights corresponded to how likely it was the robot was
 at that point based on the robots change in x, y, and theta position. We used
-the robots change in position to update the particles position which moved the
+the robot's change in position to update the particles position which moved the
 same x,y, and theta amount as the robot. 
 
 ## How did you solve the problem? 
 *(Note: this doesn't have to be super-detailed, you should try to explain what you did at a high-level so that others in the class could reasonably understand what you did).*
-To develop the localizer, three classes were created: a Particle class, a ParticleFilter class, and a Localizer class. The particle class handles the creation of particles and converts them into a Pose message easily visualized in RVIZ while the ParticleFilter class iniializes a particle cloud around the robot (plus some noise to add variation), normalized the particles, and then publishes them to a PoseArray.
+To develop the localizer, three classes were created: a Particle class, a ParticleFilter class, and a Localizer class. The particle class handles the creation of particles and converts them into a Pose message easily visualized in RVIZ while the ParticleFilter class initializes a particle cloud around the robot (plus some noise to add variation), normalized the particles, and then publishes them to a PoseArray.
 
 ![GIF of our particle filter in action](https://github.com/isaacvandor/robot_localization/blob/master/media/filterclouds.gif)
 
