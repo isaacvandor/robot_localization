@@ -2,9 +2,9 @@
   <arg name="scan_topic" default="stable_scan"/>
   <arg name="use_builtin" default="false"/>
   <arg name="map_file"/>
- 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/> 
- 
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+
  <!-- Localization node
 
 	This launch file either uses the built in particle filter AMCL or the
@@ -21,7 +21,7 @@
  </group>
 
  <group unless="$(arg use_builtin)">
-  <node name="pf" pkg="robot_localizer" type="pf.py" output="screen">
+  <node name="pf" pkg="robot_localizer" type="localizer.py" output="screen">
     <remap from="scan" to="$(arg scan_topic)"/>
   </node>
 </group>

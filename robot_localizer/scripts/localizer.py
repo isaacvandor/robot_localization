@@ -40,8 +40,6 @@ class RobotLocalizer(object):
         self.odom_frame = "odom"        # Odom coord frame
         self.scan_topic = "scan"        # Laser scan topic
 
-        self.num_particles = 100          # # of particles to use
-
         self.linear_threshold = 0.1             # the amount of linear movement before performing an update
         self.angular_threshold = math.pi/10     # the amount of angular movement before performing an update
 
@@ -136,15 +134,31 @@ class RobotLocalizer(object):
         '''Resample the particles according to the new particle weights.'''
         # make sure the distribution is normalized
         self.pf.particle_normalizer()
+        particle_list = []
+        weights = []
+        num_samples = len(self.pf.particle_cloud)
+        for particle in self.pf.particle_cloud:
+            particle_list.append(particle)
+            weights.append(particle.w)
 
-        if len(self.pf.particle_cloud):
-            '''Make sure the particle weights sum to 1'''
-            weights_sum = [particle.w for particle in self.pf.particle_cloud]
 
-            return list(np.random.choice(self.pf.particle_cloud, size=len(self.pf.particle_cloud), replace=True, p=weights_sum))
-        else:
-            print("help i've fallen")
-            return None
+        self.pf.particle_cloud = self.draw_random_sample(particle_list, weights, num_samples)
+
+    def draw_random_sample(self, choices, probabilities, n):
+        """ Return a random sample of n elements from the set choices with the specified probabilities
+            choices: the values to sample from represented as a list
+            probabilities: the probability of selecting each element in choices represented as a list
+            n: the number of samples
+        """
+        # sets up an index list for the chosen particles, and makes bins for the probabilities
+        values = np.array(range(len(choices)))
+        probs = np.array(probabilities)
+        bins = np.add.accumulate(probs)
+        inds = values[np.digitize(random_sample(n), bins)]  # chooses the new particles based on the probabilities of the old ones
+        samples = []
+        for i in inds:
+            samples.append(deepcopy(choices[int(i)]))   # makes the new particle cloud based on the chosen particles
+        return samples
 
     def laser_particle_updater(self, msg):
         '''Updates the particle weights in response to the scan contained in the msg'''
@@ -209,17 +223,15 @@ class RobotLocalizer(object):
             self.fix_map_to_odom_transform(msg)
             print("Initialized finally!")
             self.pf.particle_publisher(msg)
-        elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.linear_threshold or
-              math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.linear_threshold or
-              math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.angular_threshold):
+        else:
             # we have moved far enough to do an update!
-            self.odom_particle_updater(msg)    # update based on odometry
+            #self.odom_particle_updater(msg)    # update based on odometry
             #print("map!")
-            self.laser_particle_updater(msg)   # update based on laser scan
-            self.robot_pose_updater()                # update robot's pose
+            #self.laser_particle_updater(msg)   # update based on laser scan
+            #self.robot_pose_updater()                # update robot's pose
             self.particle_resampler()               # resample particles to focus on areas of high density
             self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
-            self.pf.particle_publisher(msg)
+        self.pf.particle_publisher(msg)
 
     def fix_map_to_odom_transform(self, msg):
             """ This method constantly updates the offset of the map and
